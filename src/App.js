@@ -1,24 +1,74 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useContext } from "react";
+import { Switch, Route, Redirect, Link } from "react-router-dom";
+import { AuthContext } from "./context/AuthContext";
+import LoginPage from "./pages/LoginPage";
+import TechnicianUpload from "./pages/TechnicianUpload";
+import DentistViewer from "./pages/DentistViewer";
 
-function App() {
+const App = () => {
+  const { auth, logout } = useContext(AuthContext);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <nav className="navbar">
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <h2 style={{ margin: 0 }}>OralVis Healthcare</h2>
+          <Link to="/" style={{ color: "white", textDecoration: "none", marginLeft: 12 }}>
+            Home
+          </Link>
+        </div>
+
+        <div>
+          {auth ? (
+            <>
+              <span style={{ marginRight: 12 }}>
+                {auth.user?.name} ({auth.user?.role})
+              </span>
+              <button className="btn" onClick={logout}>
+                Logout
+              </button>
+            </>
+          ) : (
+            <Link to="/login" className="btn-link">Login</Link>
+          )}
+        </div>
+      </nav>
+
+      <main>
+        <Switch>
+          <Route exact path="/login" component={LoginPage} />
+          <PrivateRoute exact path="/upload" role="technician" component={TechnicianUpload} />
+          <PrivateRoute exact path="/scans" role="dentist" component={DentistViewer} />
+          <Route exact path="/">
+            {auth ? (
+              auth.user?.role === "technician" ? <Redirect to="/upload" /> : <Redirect to="/scans" />
+            ) : (
+              <Redirect to="/login" />
+            )}
+          </Route>
+          <Route path="*">
+            <div style={{ padding: 20, textAlign: "center" }}>
+              <h3>404 - Not Found</h3>
+              <Link to="/">Go Home</Link>
+            </div>
+          </Route>
+        </Switch>
+      </main>
     </div>
+  );
+};
+
+function PrivateRoute({ component: Component, role, ...rest }) {
+  const { auth } = useContext(AuthContext);
+  return (
+    <Route
+      {...rest}
+      render={(props) =>
+        auth && auth.user && (!role || auth.user.role === role)
+          ? <Component {...props} />
+          : <Redirect to="/login" />
+      }
+    />
   );
 }
 
