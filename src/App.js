@@ -1,7 +1,9 @@
+// src/App.js
 import React, { useContext } from "react";
 import { Switch, Route, Redirect, Link } from "react-router-dom";
 import { AuthContext } from "./context/AuthContext";
 import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
 import TechnicianUpload from "./pages/TechnicianUpload";
 import DentistViewer from "./pages/DentistViewer";
 
@@ -29,7 +31,14 @@ const App = () => {
               </button>
             </>
           ) : (
-            <Link to="/login" className="btn-link">Login</Link>
+            <>
+              <Link to="/login" className="btn-link" style={{ marginRight: 8 }}>
+                Login
+              </Link>
+              <Link to="/register" className="btn-link">
+                Register
+              </Link>
+            </>
           )}
         </div>
       </nav>
@@ -37,11 +46,16 @@ const App = () => {
       <main>
         <Switch>
           <Route exact path="/login" component={LoginPage} />
+          <Route exact path="/register" component={RegisterPage} />
           <PrivateRoute exact path="/upload" role="technician" component={TechnicianUpload} />
           <PrivateRoute exact path="/scans" role="dentist" component={DentistViewer} />
           <Route exact path="/">
             {auth ? (
-              auth.user?.role === "technician" ? <Redirect to="/upload" /> : <Redirect to="/scans" />
+              auth.user?.role === "technician" ? (
+                <Redirect to="/upload" />
+              ) : (
+                <Redirect to="/scans" />
+              )
             ) : (
               <Redirect to="/login" />
             )}
@@ -64,9 +78,11 @@ function PrivateRoute({ component: Component, role, ...rest }) {
     <Route
       {...rest}
       render={(props) =>
-        auth && auth.user && (!role || auth.user.role === role)
-          ? <Component {...props} />
-          : <Redirect to="/login" />
+        auth && auth.user && (!role || auth.user.role === role) ? (
+          <Component {...props} />
+        ) : (
+          <Redirect to="/login" />
+        )
       }
     />
   );

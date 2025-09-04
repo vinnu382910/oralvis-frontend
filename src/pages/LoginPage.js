@@ -1,5 +1,6 @@
+// src/pages/LoginPage.js
 import React, { useState, useContext } from "react";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 import API from "../api/api";
 import { AuthContext } from "../context/AuthContext";
 
@@ -16,12 +17,12 @@ const LoginPage = () => {
     setLoading(true);
     try {
       const res = await API.post("/auth/login", form);
-      // res.data = { user, token }
       login(res.data);
       if (res.data.user.role === "technician") history.push("/upload");
       else history.push("/scans");
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
+      console.log( err.response?.data?.message);
     } finally {
       setLoading(false);
     }
@@ -52,8 +53,12 @@ const LoginPage = () => {
         </button>
       </form>
 
-      <div style={{ marginTop: 12, fontSize: 14 }}>
-        <strong>Seed accounts (local dev):</strong>
+      <div style={{ marginTop: 12 }}>
+        Don't have an account? <Link to="/register">Register</Link>
+      </div>
+
+      <div style={{ marginTop: 12, fontSize: 13 }}>
+        <strong>Seed accounts (for quick test):</strong>
         <div>Technician: tech@oralvis.com / password123</div>
         <div>Dentist: dentist@oralvis.com / password123</div>
       </div>
